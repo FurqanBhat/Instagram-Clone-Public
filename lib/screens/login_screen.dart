@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:instagram_clone_flutter/resources/auth_methods.dart';
+import 'package:instagram_clone_flutter/screens/register_screen.dart';
 import 'package:instagram_clone_flutter/utils/colors.dart';
 import 'package:instagram_clone_flutter/widgets/text_field_input.dart';
+
+import '../responsive/mobile_screen_layout.dart';
+import '../responsive/responsive_layout_screen.dart';
+import '../responsive/web_screen_layout.dart';
+import '../utils/utils.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,11 +19,34 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController=TextEditingController();
   final TextEditingController _passwordController=TextEditingController();
+  bool _isLoading=false;
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+  void loginUser() async{
+    setState(() {
+      _isLoading=true;
+    });
+    String result= await AuthMethods().login(email: _emailController.text, password: _passwordController.text);
+    setState(() {
+      _isLoading=false;
+    });
+    print(result);
+    if(result != "Success"){
+      showSnackBar(result, context);
+    }else {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const ResponsiveLayout(
+            webScreenLayout: WebScreenLayout(),
+            mobileScreenLayout: MobileScreenLayout(),
+          )));
+    }
+  }
+  void navigateToRegisterScreen(){
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>RegisterScreen()));
   }
   @override
   Widget build(BuildContext context) {
@@ -52,10 +82,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 24,),
               InkWell(
-                onTap: (){},
+                onTap: loginUser,
                 child: Container(
                   width: double.infinity,
-                  child: Text("Log in"),
+                  child: _isLoading ? Center(child: CircularProgressIndicator(color: primaryColor,),)
+                  : Text("Log in"),
                   padding: EdgeInsets.symmetric(vertical: 12),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
@@ -78,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: EdgeInsets.symmetric(vertical: 8),
                   ),
                   GestureDetector(
-                    onTap: (){},
+                    onTap: navigateToRegisterScreen,
                     child: Container(
                       child: Text("Sign up", style: TextStyle(fontWeight: FontWeight.bold),),
                       padding: EdgeInsets.symmetric(vertical: 8),

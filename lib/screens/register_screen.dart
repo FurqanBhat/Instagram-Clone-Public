@@ -7,6 +7,12 @@ import 'package:instagram_clone_flutter/resources/auth_methods.dart';
 import 'package:instagram_clone_flutter/utils/colors.dart';
 import 'package:instagram_clone_flutter/utils/utils.dart';
 import 'package:instagram_clone_flutter/widgets/text_field_input.dart';
+
+import '../responsive/mobile_screen_layout.dart';
+import '../responsive/responsive_layout_screen.dart';
+import '../responsive/web_screen_layout.dart';
+import 'login_screen.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -15,10 +21,11 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final TextEditingController _emailController=TextEditingController();
-  final TextEditingController _passwordController=TextEditingController();
-  final TextEditingController _bioController=TextEditingController();
-  final TextEditingController _usernameController=TextEditingController();
+  bool _isLoading = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _bioController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   Uint8List? _image;
   @override
   void dispose() {
@@ -28,12 +35,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _usernameController.dispose();
     super.dispose();
   }
-  void selectImage() async{
-    Uint8List image= await pickImage(ImageSource.camera);
+
+  void selectImage() async {
+    Uint8List image = await pickImage(ImageSource.camera);
     setState(() {
-      _image=image;
+      _image = image;
     });
   }
+
+  void registerUser() async {
+    setState(() {
+      _isLoading = true;
+    });
+    String result = await AuthMethods().register(
+        email: _emailController.text,
+        password: _passwordController.text,
+        username: _usernameController.text,
+        bio: _bioController.text,
+        file: _image!);
+    setState(() {
+      _isLoading = false;
+    });
+    print(result);
+    if (result != "Success") {
+      showSnackBar(result, context);
+    } else {
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const ResponsiveLayout(
+                webScreenLayout: WebScreenLayout(),
+                mobileScreenLayout: MobileScreenLayout(),
+              )));
+    }
+  }
+
+  void navigateToLoginScreen() {
+    Navigator.of(context)
+        .pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,18 +92,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 color: primaryColor,
                 height: 60,
               ),
-              SizedBox(height: 0,),
+              SizedBox(
+                height: 0,
+              ),
               Stack(
                 children: [
-                  _image!=null ?
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: MemoryImage(_image!),
-                  ):
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: NetworkImage('https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg'),
-                  ),
+                  _image != null
+                      ? CircleAvatar(
+                          radius: 50,
+                          backgroundImage: MemoryImage(_image!),
+                        )
+                      : CircleAvatar(
+                          radius: 50,
+                          backgroundImage: NetworkImage(
+                              'https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg'),
+                        ),
                   Positioned(
                     bottom: -10,
                     left: 70,
@@ -75,50 +117,63 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   )
                 ],
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               TextFieldInput(
                 hintText: "Enter your username",
                 textInputType: TextInputType.text,
                 controller: _usernameController,
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               TextFieldInput(
                 hintText: "Enter Your Email",
                 textInputType: TextInputType.emailAddress,
                 controller: _emailController,
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               TextFieldInput(
                 hintText: "Enter Your Password",
                 textInputType: TextInputType.text,
                 obscure: true,
                 controller: _passwordController,
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               TextFieldInput(
                 hintText: "Enter bio",
                 textInputType: TextInputType.text,
                 controller: _bioController,
               ),
-              SizedBox(height: 24,),
+              SizedBox(
+                height: 24,
+              ),
               InkWell(
-                onTap: () async{
-                  String res=await AuthMethods().register(email: _emailController.text, password: _passwordController.text, username: _usernameController.text, bio: _bioController.text, file: _image!);
-                  print(res);
-                  },
+                onTap: registerUser,
                 child: Container(
                     width: double.infinity,
-                    child: Text("Register"),
+                    child: _isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              color: primaryColor,
+                            ),
+                          )
+                        : Text("Register"),
                     padding: EdgeInsets.symmetric(vertical: 12),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
                       color: blueColor,
-                    )
-
-                ),
+                    )),
               ),
-              SizedBox(height: 14,),
+              SizedBox(
+                height: 14,
+              ),
               Flexible(
                 child: Container(),
                 flex: 2,
@@ -131,18 +186,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     padding: EdgeInsets.symmetric(vertical: 8),
                   ),
                   GestureDetector(
-                    onTap: (){},
+                    onTap: navigateToLoginScreen,
                     child: Container(
-                      child: Text("Log in", style: TextStyle(fontWeight: FontWeight.bold),),
+                      child: Text(
+                        "Log in",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       padding: EdgeInsets.symmetric(vertical: 8),
                     ),
                   ),
-
                 ],
               ),
-              SizedBox(height: 8,)
-
-
+              SizedBox(
+                height: 8,
+              )
             ],
           ),
         ),
