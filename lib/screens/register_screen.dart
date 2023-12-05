@@ -1,6 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:instagram_clone_flutter/resources/auth_methods.dart';
 import 'package:instagram_clone_flutter/utils/colors.dart';
+import 'package:instagram_clone_flutter/utils/utils.dart';
 import 'package:instagram_clone_flutter/widgets/text_field_input.dart';
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _passwordController=TextEditingController();
   final TextEditingController _bioController=TextEditingController();
   final TextEditingController _usernameController=TextEditingController();
+  Uint8List? _image;
   @override
   void dispose() {
     _emailController.dispose();
@@ -21,6 +27,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _bioController.dispose();
     _usernameController.dispose();
     super.dispose();
+  }
+  void selectImage() async{
+    Uint8List image= await pickImage(ImageSource.camera);
+    setState(() {
+      _image=image;
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -34,14 +46,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               Flexible(
                 child: Container(),
-                flex: 2,
+                flex: 1,
               ),
               SvgPicture.asset(
                 "ic_instagram.svg",
                 color: primaryColor,
-                height: 64,
+                height: 60,
               ),
-              SizedBox(height: 64,),
+              SizedBox(height: 0,),
+              Stack(
+                children: [
+                  _image!=null ?
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: MemoryImage(_image!),
+                  ):
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: NetworkImage('https://t4.ftcdn.net/jpg/02/15/84/43/240_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg'),
+                  ),
+                  Positioned(
+                    bottom: -10,
+                    left: 70,
+                    child: IconButton(
+                      icon: Icon(Icons.add_a_photo),
+                      onPressed: selectImage,
+                    ),
+                  )
+                ],
+              ),
+              SizedBox(height: 24,),
               TextFieldInput(
                 hintText: "Enter your username",
                 textInputType: TextInputType.text,
@@ -68,7 +102,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               SizedBox(height: 24,),
               InkWell(
-                onTap: (){},
+                onTap: () async{
+                  String res=await AuthMethods().register(email: _emailController.text, password: _passwordController.text, username: _usernameController.text, bio: _bioController.text, file: _image!);
+                  print(res);
+                  },
                 child: Container(
                     width: double.infinity,
                     child: Text("Register"),
