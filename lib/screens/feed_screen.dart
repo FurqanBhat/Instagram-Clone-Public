@@ -20,29 +20,30 @@ class FeedScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.messenger_outline),
-            onPressed: (){},
+            onPressed: () {},
           ),
         ],
       ),
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('posts').snapshots(),
-        builder: (context, AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot ){
-          if(snapshot.connectionState == ConnectionState.waiting){
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index){
-              return PostCard(
-                snap: snapshot.data!.docs[index],
+          stream: FirebaseFirestore.instance
+              .collection('posts')
+              .orderBy('datePublished', descending: true)
+              .snapshots(),
+          builder: (context,
+              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
               );
             }
-          );
-
-        }
-      ),
+            return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  return PostCard(
+                    snap: snapshot.data!.docs[index],
+                  );
+                });
+          }),
     );
   }
 }

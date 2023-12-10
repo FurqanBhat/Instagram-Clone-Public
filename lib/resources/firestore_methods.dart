@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:instagram_clone_flutter/models/post.dart';
 import 'package:instagram_clone_flutter/resources/auth_methods.dart';
 import 'package:instagram_clone_flutter/resources/storage_methods.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class FirestoreMethods {
@@ -43,8 +44,30 @@ class FirestoreMethods {
       });
     }
 
-
-
-
  }
+  Future<String> postComment({required String postId, required String uid, required String username, required String text, required String profilePic}) async {
+    String res='unknown error occured';
+    try{
+      if(text.isNotEmpty){
+        String commentId=Uuid().v1();
+        await _firestore.collection('posts').doc(postId).collection('comments').doc(commentId).set({
+          "commentId" : commentId,
+          "uid": uid,
+          "username": username,
+          'text': text,
+          'profileUrl': profilePic,
+          'datePublished': DateTime.now()
+        });
+        res='Success';
+      }else{
+        res="Text is Empty";
+      }
+    }catch(e){
+      res=e.toString();
+      print(e.toString());
+    }
+    print(res);
+    return res;
+  }
+
 }
