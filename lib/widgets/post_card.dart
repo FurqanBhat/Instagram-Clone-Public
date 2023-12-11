@@ -79,7 +79,10 @@ class _PostCardState extends State<PostCard> {
                                   'Delete',
                                 ]
                                     .map((e) => InkWell(
-                                          onTap: () {},
+                                          onTap: () async{
+                                            await FirestoreMethods().deletePost(widget.snap.get('postId'));
+                                            Navigator.of(context).pop();
+                                          },
                                           child: Container(
                                             padding: EdgeInsets.symmetric(
                                                 vertical: 12, horizontal: 16),
@@ -194,7 +197,7 @@ class _PostCardState extends State<PostCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.snap.get('likes').length.toString(),
+                  widget.snap.get('likes').length.toString() + " likes",
                   textAlign: TextAlign.left,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),

@@ -12,9 +12,9 @@ class FirestoreMethods {
   Future<String> uploadPost(Uint8List file, String description, String uid, String username, String profileImage) async {
     String result = "Error Occured";
     try {
-      String postUrl =
-          await StorageMethods().uploadToStorage("posts", file, true);
       String postId = Uuid().v1();
+      String postUrl =
+          await StorageMethods().uploadToStorage("posts", file, true, postId);
       Post post = Post(
           description: description,
           uid: uid,
@@ -68,6 +68,16 @@ class FirestoreMethods {
     }
     print(res);
     return res;
+  }
+  Future<void> deletePost(String postId) async{
+    try{
+      await _firestore.collection('posts').doc(postId).delete();
+      await StorageMethods().deleteFromStorage(postId);
+
+    }catch(e){
+      print(e.toString());
+    }
+
   }
 
 }
