@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:instagram_clone_flutter/screens/profile_screen.dart';
 import 'package:instagram_clone_flutter/utils/colors.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
           },
           controller: _searchController,
           decoration: InputDecoration(
-            labelText: "Search for a uses",
+            labelText: "Search for a user",
           ),
         ),
       ),
@@ -50,6 +51,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     return ListTile(
+                      onTap: (){
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProfileScreen(uid: snapshot.data!.docs[index].get('uid'))));
+                      },
                       title: Text(snapshot.data!.docs[index].get('username')),
                       leading: CircleAvatar(
                         backgroundImage: NetworkImage(
